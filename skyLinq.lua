@@ -4,12 +4,14 @@ local skyLinqInner = {}
 
 function skyLinqInner.mergeSort(t,comparator)
     local len = 0
-    local a = t
+    local a = {}
     local b = {}
     for index, value in ipairs(t) do
         len = len + 1
+        a[index] = value
         b[index] = 0
     end
+    local result = a
 
     local seg  = 1
     while seg <= len do
@@ -48,6 +50,7 @@ function skyLinqInner.mergeSort(t,comparator)
         a,b = b,a
         seg = seg + seg
     end
+    return result
 end
 
 ---@field func function
@@ -97,8 +100,8 @@ function skyLinqCommand.where(current, comparator)
         curComparator = comparator
     elseif type(comparator) == "table" then
         curComparator = function(o)
-            for i, v in ipairs(comparator) do
-                if v == o then
+            for index, value in ipairs(comparator) do
+                if value == o then
                     return true
                 end
             end
@@ -109,12 +112,12 @@ function skyLinqCommand.where(current, comparator)
             return comparator == o
         end
     end
-    for i, v in ipairs(current) do
-        if curComparator(v) then
-            if type(i) == "number" then
-                table.insert(result, v)
+    for index, value in ipairs(current) do
+        if curComparator(value) then
+            if type(index) == "number" then
+                table.insert(result, value)
             else
-                result[i] = v
+                result[index] = value
             end
         end
     end
@@ -128,8 +131,8 @@ function skyLinqCommand.whereDictionary(current, comparator)
         curComparator = comparator
     elseif type(comparator) == "table" then
         curComparator = function(o)
-            for i, v in pairs(comparator) do
-                if v == o then
+            for index, value in pairs(comparator) do
+                if value == o then
                     return true
                 end
             end
@@ -190,15 +193,8 @@ end
 
 
 
-function skyLinqCommand.orderby(current, comparator)
-    local result = {}
-    for index, value in pairs(current) do
-        if type(index) == "number" then
-            table.insert(result,value)
-        else
-            result[index] = value
-        end
-    end
+function skyLinqCommand.orderBy(current, comparator)
+    local result
     local curComparator
     if type(comparator) == "function" then
         curComparator = comparator
@@ -207,19 +203,12 @@ function skyLinqCommand.orderby(current, comparator)
             return a < b
         end
     end
-    skyLinqInner.mergeSort(result,curComparator)
+    result = skyLinqInner.mergeSort(current,curComparator)
     return result
 end
 
-function skyLinqCommand.orderbyDescending(current, comparator)
-    local result = {}
-    for index, value in pairs(current) do
-        if type(index) == "number" then
-            table.insert(result,value)
-        else
-            result[index] = value
-        end
-    end
+function skyLinqCommand.orderByDescending(current, comparator)
+    local result
     local curComparator
     if type(comparator) == "function" then
         curComparator = function(a,b)
@@ -230,7 +219,7 @@ function skyLinqCommand.orderbyDescending(current, comparator)
             return a > b
         end
     end
-    skyLinqInner.mergeSort(result,curComparator)
+    result = skyLinqInner.mergeSort(current,curComparator)
     return result
 end
 
@@ -275,7 +264,8 @@ function skyLinq.from(source)
 end
 
 ---* Add a command to linq
----@param func function
+---@param self Linq
+---@param command skyLinqCommand
 local function addCommand(self,command)
     table.insert(self.linqCommand,command)
 end
@@ -347,7 +337,7 @@ end
 ---* Select some value from value in table
 ---@generic TValue
 ---@generic TNewValue
----@param comparator fun(value : TValue):TNewValue such as function(value) return value.name end
+---@param getter fun(value : TValue):TNewValue such as function(value) return value.name end
 ---@return Linq
 function skyLinq:select(getter)
     addCommand(self,skyLinqCommand.create(skyLinqCommand.select,getter))
@@ -358,7 +348,7 @@ end
 ---@generic TKey
 ---@generic TValue
 ---@generic TNewValue
----@param comparator fun(key : TKey,value : TValue):TNewValue such as function(key,value) return {id = key,name = value} end
+---@param getter fun(key : TKey,value : TValue):TNewValue such as function(key,value) return {id = key,name = value} end
 ---@return Linq
 function skyLinq:selectDictionary(getter)
     addCommand(self,skyLinqCommand.create(skyLinqCommand.selectDictionary,getter))
@@ -370,8 +360,8 @@ end
 ---@generic TValue
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a < b end
 ---@return Linq
-function skyLinq:orderby(comparator)
-    addCommand(self,skyLinqCommand.create(skyLinqCommand.orderby,comparator))
+function skyLinq:orderBy(comparator)
+    addCommand(self,skyLinqCommand.create(skyLinqCommand.orderBy,comparator))
     return self
 end
 
@@ -380,8 +370,8 @@ end
 ---@generic TValue
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a < b end
 ---@return Linq
-function skyLinq:orderbyDescending(comparator)
-    addCommand(self,skyLinqCommand.create(skyLinqCommand.orderbyDescending,comparator))
+function skyLinq:orderByDescending(comparator)
+    addCommand(self,skyLinqCommand.create(skyLinqCommand.orderByDescending,comparator))
     return self
 end
 

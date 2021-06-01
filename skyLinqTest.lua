@@ -83,7 +83,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby()
+arrayB = skyLinq.from(arrayA):orderBy()
 serialize(arrayB)
 
 print("Test [Orderby Change] Command")
@@ -93,7 +93,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby()
+arrayB = skyLinq.from(arrayA):orderBy()
 serialize(arrayB)
 
 print("after2")
@@ -108,7 +108,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby()
+arrayB = skyLinq.from(arrayA):orderBy()
 serialize(arrayB)
 
 print("after2")
@@ -124,7 +124,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby()
+arrayB = skyLinq.from(arrayA):orderBy()
 serialize(arrayB)
 
 print("Test [OrderbyDescending] Command")
@@ -133,7 +133,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderbyDescending()
+arrayB = skyLinq.from(arrayA):orderByDescending()
 serialize(arrayB)
 
 print("Test [Orderby and Where] Command")
@@ -143,7 +143,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby():where(function(num) return num >= 5 end)
+arrayB = skyLinq.from(arrayA):orderBy():where(function(num) return num >= 5 end)
 serialize(arrayB)
 
 print("Test [Select] Command")
@@ -189,7 +189,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):toArray(function(k,v)return {k,v.a} end):orderby(function(a,b)return a[2] < b[2] end)
+arrayB = skyLinq.from(arrayA):toArray(function(k,v)return {k,v.a} end):orderBy(function(a,b)return a[2] < b[2] end)
 
 serialize(arrayB)
 

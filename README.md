@@ -1,8 +1,12 @@
 # skyLuaLinq
 
-这是一个在lua中使用linq的库
+这是一个在lua中使用linq进行查询的库
+
+> 该库使用了 emmylua 的注解功能加上了注释，推荐使用该插件对注释进行查看
+> emmylua [Intellij版本](https://github.com/EmmyLua/IntelliJ-EmmyLua) [vscode版本](https://github.com/EmmyLua/VSCode-EmmyLua)
 
 目前支持：
+## 延迟查询
 
 |函数|功能|
 |-|-|
