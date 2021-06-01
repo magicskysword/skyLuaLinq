@@ -30,7 +30,7 @@ end
 
 local arrayA
 local arrayB
-
+local arrayC
 
 print("Test Empty Array Linq")
 arrayA = {1,2,3,4,5,6}
@@ -97,9 +97,25 @@ arrayB = skyLinq.from(arrayA):orderby()
 serialize(arrayB)
 
 print("after2")
-table.insert(arrayA,5)
-table.insert(arrayA,11)
+table.insert(arrayA,10)
+table.insert(arrayA,12)
 serialize(arrayB)
+
+print("Test [Copy Orderby Change] Command")
+
+arrayA = {1,5,2,4,6,3,7,8}
+print("before")
+serialize(arrayA)
+
+print("after")
+arrayB = skyLinq.from(arrayA):orderby()
+serialize(arrayB)
+
+print("after2")
+table.insert(arrayA,10)
+table.insert(arrayA,12)
+arrayC = skyLinq.from(arrayB):toArray(function(index,value)return {index,value} end)
+serialize(arrayC)
 
 print("Test [Orderby Mixed] Command")
 
