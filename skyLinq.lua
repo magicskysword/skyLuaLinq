@@ -435,6 +435,15 @@ function skyLinq:orderByDescending(comparator)
 end
 
 ---* Get the max value for table
+---* getter and comparator can be nil
+---* if getter is nil,it will ues the value directly
+---* if comparator is nil,it will use function(a,b) return a < b end
+---* In comparator,if compare a and b is true,a will go in back of b
+---@generic TValue
+---@generic TNewValue
+---@param getter fun(value : TValue):TNewValue such as function(value) return value.index end
+---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a < b end
+---@return TNewValue
 function skyLinq:max(getter,comparator)
     assert(type(self) == "table","get value is not a table.")
     if isLinqObject(self) then
@@ -444,6 +453,16 @@ function skyLinq:max(getter,comparator)
     end
 end
 
+---* Get the min value for table
+---* getter and comparator can be nil
+---* if getter is nil,it will ues the value directly
+---* if comparator is nil,it will use function(a,b) return a < b end
+---* In comparator,if compare a and b is true,a will go in back of b
+---@generic TValue
+---@generic TNewValue
+---@param getter fun(value : TValue):TNewValue such as function(value) return value.index end
+---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a < b end
+---@return TNewValue
 function skyLinq:min(getter,comparator)
     assert(type(self) == "table","get value is not a table.")
     if isLinqObject(self) then
