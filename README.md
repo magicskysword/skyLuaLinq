@@ -19,7 +19,12 @@
 
 范例：
 ```lua
-arrayA = {1,2,3,a = 1,b = 2,c = 3}
+arrayA = {
+    a = {a = 1},
+    b = {a = 3},
+    c = {a = 4},
+    d = {a = 6}
+}
 
 arrayB = skyLinq.from(arrayA)
     :toArray(function(k,v)return {k,v.a} end)
