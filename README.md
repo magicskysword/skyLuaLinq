@@ -37,6 +37,8 @@
 
 范例：
 ```lua
+local skyLinq = require("skyLinq")
+
 arrayA = {
     a = {a = 1},
     b = {a = 3},
