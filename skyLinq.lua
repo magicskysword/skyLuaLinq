@@ -223,7 +223,61 @@ function skyLinqCommand.orderByDescending(current, comparator)
     return result
 end
 
+function skyLinqCommand.max(current,getter,comparator)
+    local curGetter
+    local curComparator
+    if type(getter) == "function" then
+        curGetter = getter
+    else
+        curGetter = function(value)
+            return value
+        end
+    end
+    if type(comparator) == "function" then
+        curComparator = comparator
+    else
+        curComparator = function(a,b)
+            return a < b
+        end
+    end
+    local maxValue = nil
+    local curValue
+    for key, value in pairs(current) do
+        curValue = curGetter(value)
+        if maxValue == nil or curComparator(maxValue,curValue)  then
+            maxValue = curValue
+        end
+    end
+    return maxValue
+end
 
+function skyLinqCommand.min(current,getter,comparator)
+    local curGetter
+    local curComparator
+    if type(getter) == "function" then
+        curGetter = getter
+    else
+        curGetter = function(value)
+            return value
+        end
+    end
+    if type(comparator) == "function" then
+        curComparator = comparator
+    else
+        curComparator = function(a,b)
+            return a < b
+        end
+    end
+    local minValue = nil
+    local curValue
+    for key, value in pairs(current) do
+        curValue = curGetter(value)
+        if minValue == nil or not curComparator(minValue,curValue)  then
+            minValue = curValue
+        end
+    end
+    return minValue
+end
 
 ---@field linqCommand skyLinqCommand[]
 ---@field source table
@@ -237,13 +291,18 @@ local skyLinqMateTable = {
     end
 }
 
+local function isLinqObject(object)
+    return object["__linqFlag"] == true
+end
+
+
 ---* create a linq query
 ---@param source table
 ---@return Linq
 function skyLinq.from(source)
     assert(type(source) == "table","source is not a table.")
     local o
-    if source["__linqFlag"] then
+    if isLinqObject(source) then
         o = {
             source = rawget(source,"source"),
             linqCommand = {},
@@ -373,6 +432,25 @@ end
 function skyLinq:orderByDescending(comparator)
     addCommand(self,skyLinqCommand.create(skyLinqCommand.orderByDescending,comparator))
     return self
+end
+
+---* Get the max value for table
+function skyLinq:max(getter,comparator)
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.max(self:run(),getter,comparator)
+    else
+        return skyLinqCommand.max(self,getter,comparator)
+    end
+end
+
+function skyLinq:min(getter,comparator)
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.min(self:run(),getter,comparator)
+    else
+        return skyLinqCommand.min(self,getter,comparator)
+    end
 end
 
 return skyLinq

@@ -31,6 +31,7 @@ end
 local arrayA
 local arrayB
 local arrayC
+local result
 
 print("Test Empty Array Linq")
 arrayA = {1,2,3,4,5,6}
@@ -192,6 +193,20 @@ print("after")
 arrayB = skyLinq.from(arrayA):toArray(function(k,v)return {k,v.a} end):orderBy(function(a,b)return a[2] < b[2] end)
 
 serialize(arrayB)
+
+print("Test [Max] Command")
+arrayA = {1,5,2,4,6,3,7,8}
+
+print("result:")
+result = skyLinq.from(arrayA):max()
+print(result)
+
+print("Test [Min] Command")
+arrayA = {1,5,2,4,6,3,7,8}
+
+print("result:")
+result = skyLinq.from(arrayA):min()
+print(result)
 
 
 print("All Test Complete")
