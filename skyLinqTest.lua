@@ -147,6 +147,26 @@ print("after")
 arrayB = skyLinq.from(arrayA):orderBy():where(function(num) return num >= 5 end)
 serialize(arrayB)
 
+print("Test [Orderby and Thenby] Command")
+
+arrayA = {
+    {a = 3,b = 150,c = 50},
+    {a = 1,b = 300,c = 50},
+    {a = 2,b = 100,c = 50},
+    {a = 1,b = 100,c = 60},
+    {a = 1,b = 100,c = 70},
+    {a = 2,b = 200,c = 50},
+}
+print("before")
+serialize(arrayA)
+
+print("after")
+arrayB = skyLinq.from(arrayA)
+    :orderBy(function(a,b) return a.a<=b.a end)
+    :thenBy(function(a,b) return  a.b<=b.b end)
+    :thenBy(function(a,b) return  a.c<=b.c end)
+serialize(arrayB)
+
 print("Test [Select] Command")
 
 arrayA = {
