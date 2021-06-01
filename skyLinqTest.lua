@@ -216,17 +216,56 @@ serialize(arrayB)
 
 print("Test [Max] Command")
 arrayA = {1,5,2,4,6,3,7,8}
+print("before")
+serialize(arrayA)
 
 print("result:")
 result = skyLinq.from(arrayA):max()
 print(result)
 
 print("Test [Min] Command")
+print("before")
+serialize(arrayA)
 arrayA = {1,5,2,4,6,3,7,8}
 
 print("result:")
 result = skyLinq.from(arrayA):min()
 print(result)
 
+print("Test [First in array] Command")
+arrayA = {5,4,3}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):first()
+print(result)
+
+print("Test [First in Hash] Command")
+arrayA = {a = 1,b = 2,c = 3}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):first()
+print(result)
+
+print("Test [First in Empty] Command")
+arrayA = {}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):first()
+print(result)
+
+print("Test [First in Empty and have Default] Command")
+arrayA = {}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):first(5)
+print(result)
 
 print("All Test Complete")

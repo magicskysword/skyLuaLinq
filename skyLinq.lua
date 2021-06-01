@@ -1,4 +1,5 @@
 local pairs = pairs
+local ipairs = ipairs
 local unpack = table.unpack
 
 local skyLinqInner = {}
@@ -291,6 +292,21 @@ function skyLinqCommand.min(current,getter,comparator)
     return minValue
 end
 
+function skyLinqCommand.first(current,defaultValue,getter)
+    local curGetter
+    if type(getter) == "function" then
+        curGetter = getter
+    else
+        curGetter = function(index,value)
+            return value
+        end
+    end
+    for index, value in ipairs(current) do
+        return curGetter(index,value)
+    end
+    return defaultValue
+end
+
 ---@field last Linq
 ---@field command skyLinqCommand
 ---@field source table
@@ -301,6 +317,9 @@ local skyLinqMateTable = {
     __index = skyLinq,
     __pairs = function(o)
         return pairs(o:run())
+    end,
+    __ipairs = function(o)
+        return ipairs(o:run())
     end
 }
 
@@ -497,7 +516,7 @@ function skyLinq:thenByDescending(comparator)
     return insertThenByCommand(self,skyLinqCommand.create(skyLinqCommand.orderByDescending,comparator))
 end
 
----* Get the max value for table
+---* Get the max value in table
 ---* getter and comparator can be nil
 ---* if getter is nil,it will ues the value directly
 ---* if comparator is nil,it will use function(a,b) return a < b end
@@ -516,14 +535,14 @@ function skyLinq:max(getter,comparator)
     end
 end
 
----* Get the min value for table
+---* Get the min value in table
 ---* getter and comparator can be nil
 ---* if getter is nil,it will ues the value directly
 ---* if comparator is nil,it will use function(a,b) return a < b end
 ---* In comparator,if compare a and b is true,a will go in back of b
 ---@generic TValue
 ---@generic TNewValue
----@param getter fun(value : TValue):TNewValue such as function(value) return value.index end
+---@param getter fun(value : TValue):TNewValue such as function(value) return value.name end
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a < b end
 ---@return TNewValue
 function skyLinq:min(getter,comparator)
@@ -532,6 +551,23 @@ function skyLinq:min(getter,comparator)
         return skyLinqCommand.min(self:run(),getter,comparator)
     else
         return skyLinqCommand.min(self,getter,comparator)
+    end
+end
+
+---* get the first value in array
+---* it only search on array part
+---* if getter is nil,it will ues the value directly
+---@generic TValue
+---@generic TNewValue
+---@param defaultValue TNewValue
+---@param getter fun(index : number,value : TValue):TNewValue such as function(key,value) return value.name end
+---@return TNewValue
+function skyLinq:first(defaultValue,getter)
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.first(self:run(),defaultValue,getter)
+    else
+        return skyLinqCommand.first(self,defaultValue,getter)
     end
 end
 
