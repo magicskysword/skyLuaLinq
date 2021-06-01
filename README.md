@@ -36,6 +36,9 @@
 |max|查询表中的最小值|
 |first|查询数组中的第一个值（不会查询hash部分）|
 |last|查询数组中的第一个值（不会查询hash部分）|
+|count|计算表的总长度|
+|countArray|计算表的数组长度|
+|countDictionary|计算表的哈希表长度|
 
 范例：
 ```lua

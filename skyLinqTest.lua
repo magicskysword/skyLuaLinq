@@ -304,4 +304,21 @@ print("result:")
 result = skyLinq.from(arrayA):last(5)
 print(result)
 
+print("Test [Count in mixed table] Command")
+arrayA = {1,2,3,4,5,a=1,b=2,c=3}
+print("before")
+serialize(arrayA)
+
+print("count:")
+result = skyLinq.from(arrayA):count()
+print(result)
+
+print("countArray:")
+result = skyLinq.from(arrayA):countArray()
+print(result)
+
+print("countDictionary:")
+result = skyLinq.from(arrayA):countDictionary()
+print(result)
+
 print("All Test Complete")

@@ -307,6 +307,34 @@ function skyLinqCommand.first(current,defaultValue,getter)
     return defaultValue
 end
 
+function skyLinqCommand.count(current)
+    local count = 0
+    for key, value in pairs(current) do
+        count = count + 1
+    end
+    return count
+end
+
+function skyLinqCommand.countArray(current)
+    local count = 0
+    for key, value in ipairs(current) do
+        count = count + 1
+    end
+    return count
+end
+
+function skyLinqCommand.countDictionary(current)
+    local count = 0
+    local arrayCount = 0
+    for key, value in pairs(current) do
+        count = count + 1
+    end
+    for key, value in ipairs(current) do
+        arrayCount = arrayCount + 1
+    end
+    return count - arrayCount
+end
+
 function skyLinqCommand.last(current,defaultValue,getter)
     local result = defaultValue
     local curGetter
@@ -601,6 +629,39 @@ function skyLinq:last(defaultValue,getter)
         return skyLinqCommand.last(self:run(),defaultValue,getter)
     else
         return skyLinqCommand.last(self,defaultValue,getter)
+    end
+end
+
+---* get the number of table's all element
+---@return number
+function skyLinq:count()
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.count(self:run())
+    else
+        return skyLinqCommand.count(self)
+    end
+end
+
+---* get the number of table's array element
+---@return number
+function skyLinq:countArray()
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.countArray(self:run())
+    else
+        return skyLinqCommand.countArray(self)
+    end
+end
+
+---* get the number of table's hash element
+---@return number
+function skyLinq:countDictionary()
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.countDictionary(self:run())
+    else
+        return skyLinqCommand.countDictionary(self)
     end
 end
 
