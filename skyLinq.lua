@@ -307,6 +307,22 @@ function skyLinqCommand.first(current,defaultValue,getter)
     return defaultValue
 end
 
+function skyLinqCommand.last(current,defaultValue,getter)
+    local result = defaultValue
+    local curGetter
+    if type(getter) == "function" then
+        curGetter = getter
+    else
+        curGetter = function(index,value)
+            return value
+        end
+    end
+    for index, value in ipairs(current) do
+        result = curGetter(index,value)
+    end
+    return result
+end
+
 ---@field last Linq
 ---@field command skyLinqCommand
 ---@field source table
@@ -330,7 +346,7 @@ end
 ---@return Linq
 local function createLinq(lastLinq)
     local o = {
-        last = lastLinq,
+        lastLinq = lastLinq,
         source = nil,
         command = nil,
         isGroupBy = false,
@@ -375,13 +391,13 @@ local function insertThenByCommand(last,command)
     newLinq.command = command
     newLinq.isThenBy = true
     local findLinq = last
-    while findLinq ~= nil and findLinq.last ~= nil do
-        if findLinq.last.isThenBy then
-            findLinq = findLinq.last
+    while findLinq ~= nil and findLinq.lastLinq ~= nil do
+        if findLinq.lastLinq.isThenBy then
+            findLinq = findLinq.lastLinq
             break
         else
-            newLinq.last = findLinq.last
-            findLinq.last = newLinq
+            newLinq.lastLinq = findLinq.lastLinq
+            findLinq.lastLinq = newLinq
         end
     end
     return last
@@ -393,8 +409,8 @@ end
 function skyLinq:run()
     local current
     local result
-    if self.last ~= nil then
-        current = self.last:run()
+    if self.lastLinq ~= nil then
+        current = self.lastLinq:run()
     end
     if self.command ~= nil then
         result = self.command:run(current)
@@ -568,6 +584,23 @@ function skyLinq:first(defaultValue,getter)
         return skyLinqCommand.first(self:run(),defaultValue,getter)
     else
         return skyLinqCommand.first(self,defaultValue,getter)
+    end
+end
+
+---* get the last value in array
+---* it only search on array part
+---* if getter is nil,it will ues the value directly
+---@generic TValue
+---@generic TNewValue
+---@param defaultValue TNewValue
+---@param getter fun(index : number,value : TValue):TNewValue such as function(key,value) return value.name end
+---@return TNewValue
+function skyLinq:last(defaultValue,getter)
+    assert(type(self) == "table","get value is not a table.")
+    if isLinqObject(self) then
+        return skyLinqCommand.last(self:run(),defaultValue,getter)
+    else
+        return skyLinqCommand.last(self,defaultValue,getter)
     end
 end
 

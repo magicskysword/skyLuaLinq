@@ -268,4 +268,40 @@ print("result:")
 result = skyLinq.from(arrayA):first(5)
 print(result)
 
+print("Test [Last in array] Command")
+arrayA = {5,4,3}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):last()
+print(result)
+
+print("Test [Last in Hash] Command")
+arrayA = {a = 1,b = 2,c = 3}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):last()
+print(result)
+
+print("Test [Last in Empty] Command")
+arrayA = {}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):last()
+print(result)
+
+print("Test [Last in Empty and have Default] Command")
+arrayA = {}
+print("before")
+serialize(arrayA)
+
+print("result:")
+result = skyLinq.from(arrayA):last(5)
+print(result)
+
 print("All Test Complete")
