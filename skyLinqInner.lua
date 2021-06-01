@@ -1,6 +1,6 @@
 ﻿local skyLinqInner = {}
 
-function skyLinqInner.mergeSort(t,minFunc)
+function skyLinqInner.mergeSort(t,comparator)
     local len = 0
     local a = t
     local b = {}
@@ -22,7 +22,7 @@ function skyLinqInner.mergeSort(t,minFunc)
             local start2 = mid
             local end2 = high
             while start1 < end1 and start2 < end2 do
-                if minFunc(a[start1],a[start2]) == a[start1] then
+                if comparator(a[start1],a[start2]) then
                     b[k] = a[start1]
                     start1 = start1 + 1
                 else

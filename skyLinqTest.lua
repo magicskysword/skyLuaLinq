@@ -31,22 +31,44 @@ end
 local arrayA
 local arrayB
 
+
+print("Test Empty Array Linq")
+arrayA = {1,2,3,4,5,6}
+arrayB = skyLinq.from(arrayA)
+serialize(arrayB)
+
+print("Test Empty Dictionary Linq")
+arrayA = {a = 1,b = 2,c = 3}
+arrayB = skyLinq.from(arrayA)
+serialize(arrayB)
+
+print("Test Empty Mixed Linq")
+arrayA = {1,2,3,a = 1,b = 2,c = 3}
+arrayB = skyLinq.from(arrayA)
+serialize(arrayB)
+
 print("Test [Where Array] Command")
 arrayA = {1,2,3,4,5,6}
 print("before")
-for key, value in pairs(arrayA) do
-    print(key,value)
-end
+serialize(arrayA)
 
 print("after")
 arrayB = skyLinq.from(arrayA):where(function(num) return num % 2 == 1 end)
-for key, value in pairs(arrayB) do
-    print(key,value)
-end
+serialize(arrayB)
 
 print("Test [Where Dictionary] Command")
 
 arrayA = {a = 1,b = 2,c = 3}
+print("before")
+serialize(arrayA)
+
+print("after")
+arrayB = skyLinq.from(arrayA):whereDictionary(function(key,value) return value % 2 == 1 end)
+serialize(arrayB)
+
+print("Test [Where Mixed] Command")
+
+arrayA = {1,2,3,a = 1,b = 2,c = 3}
 print("before")
 serialize(arrayA)
 
@@ -61,7 +83,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby(math.min)
+arrayB = skyLinq.from(arrayA):orderby()
 serialize(arrayB)
 
 print("Test [Orderby Change] Command")
@@ -71,12 +93,22 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby(math.min)
+arrayB = skyLinq.from(arrayA):orderby()
 serialize(arrayB)
 
 print("after2")
 table.insert(arrayA,5)
 table.insert(arrayA,11)
+serialize(arrayB)
+
+print("Test [Orderby Mixed] Command")
+
+arrayA = {1,5,2,4,6,3,7,8,a = 1,b = 2,c = 3}
+print("before")
+serialize(arrayA)
+
+print("after")
+arrayB = skyLinq.from(arrayA):orderby()
 serialize(arrayB)
 
 print("Test [OrderbyDescending] Command")
@@ -85,7 +117,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderbyDescending(math.min)
+arrayB = skyLinq.from(arrayA):orderbyDescending()
 serialize(arrayB)
 
 print("Test [Orderby and Where] Command")
@@ -95,7 +127,7 @@ print("before")
 serialize(arrayA)
 
 print("after")
-arrayB = skyLinq.from(arrayA):orderby(math.min):where(function(num) return num >= 5 end)
+arrayB = skyLinq.from(arrayA):orderby():where(function(num) return num >= 5 end)
 serialize(arrayB)
 
 print("Test [Select] Command")
@@ -127,6 +159,22 @@ serialize(arrayA)
 
 print("after")
 arrayB = skyLinq.from(arrayA):selectDictionary(function(k,v)return v.a end)
+serialize(arrayB)
+
+print("Test [ToArray] Command")
+
+arrayA = {
+    a = {a = 1},
+    b = {a = 3},
+    c = {a = 4},
+    d = {a = 6}
+}
+print("before")
+serialize(arrayA)
+
+print("after")
+arrayB = skyLinq.from(arrayA):toArray(function(k,v)return {k,v.a} end):orderby(function(a,b)return a[2] < b[2] end)
+
 serialize(arrayB)
 
 

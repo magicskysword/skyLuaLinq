@@ -13,6 +13,33 @@ function skyLinqCommand.create(func, ...)
     return command
 end
 
+function skyLinqCommand.toArray(current,selector)
+    local result
+    if(type(selector) == "function") then
+        result = {}
+        for key, value in pairs(current) do
+            table.insert(result,selector(key,value))
+        end
+    else
+        result = current
+    end
+    return result
+end
+
+function skyLinqCommand.toDictionary(current,selector)
+    local result
+    if(type(selector) == "function") then
+        result = {}
+        for key, value in pairs(current) do
+            local newKey,newValue = selector(key,value)
+            result[newKey] = newValue
+        end
+    else
+        result = current
+    end
+    return result
+end
+
 function skyLinqCommand.where(current, comparator)
     local result = {}
     local curComparator;
@@ -33,8 +60,12 @@ function skyLinqCommand.where(current, comparator)
         end
     end
     for i, v in ipairs(current) do
-        if (curComparator(v)) then
-            table.insert(result, v);
+        if curComparator(v) then
+            if type(i) == "number" then
+                table.insert(result, v)
+            else
+                result[i] = v
+            end
         end
     end
     return result
@@ -60,8 +91,12 @@ function skyLinqCommand.whereDictionary(current, comparator)
         end
     end
     for k, v in pairs(current) do
-        if (curComparator(k,v)) then
-            result[k] = v
+        if curComparator(k,v) then
+            if type(k) == "number" then
+                table.insert(result, v)
+            else
+                result[k] = v
+            end
         end
     end
     return result
@@ -73,12 +108,14 @@ function skyLinqCommand.select(current, getter)
     if type(getter) == "function" then
         curGetter = getter
     else
-        curGetter = function(o)
-            return o
-        end
+        error("The Select's getter is not a function")
     end
     for k, v in pairs(current) do
-        table.insert(result,curGetter(v))
+        if type(k) == "number" then
+            table.insert(result, curGetter(v))
+        else
+            result[k] = curGetter(v)
+        end
     end
     return result
 end
@@ -89,51 +126,61 @@ function skyLinqCommand.selectDictionary(current, getter)
     if type(getter) == "function" then
         curGetter = getter
     else
-        curGetter = function(k,o)
-            return o
-        end
+        error("The Select's getter is not a function")
     end
     for k, v in pairs(current) do
-        result[k] = curGetter(k,v)
+        if type(k) == "number" then
+            table.insert(result, curGetter(k,v))
+        else
+            result[k] = curGetter(k,v)
+        end
     end
     return result
 end
 
 
 
-function skyLinqCommand.orderby(current, minFunc)
+function skyLinqCommand.orderby(current, comparator)
     local result = {}
-    for index, value in ipairs(current) do
-        result[index] = value
-    end
-    local curMinFunc
-    if type(minFunc) == "function" then
-        curMinFunc = minFunc
-    else
-        curMinFunc = function(a,b)
-            return a < b and a or b
+    for index, value in pairs(current) do
+        if type(index) == "number" then
+            table.insert(result,value)
+        else
+            result[index] = value
         end
     end
-    skyLinqInner.mergeSort(result,curMinFunc)
+    local curComparator
+    if type(comparator) == "function" then
+        curComparator = comparator
+    else
+        curComparator = function(a,b)
+            return a < b
+        end
+    end
+    skyLinqInner.mergeSort(result,curComparator)
     return result
 end
 
-function skyLinqCommand.orderbyDescending(current, minFunc)
+function skyLinqCommand.orderbyDescending(current, comparator)
     local result = {}
-    for index, value in ipairs(current) do
-        result[index] = value
+    for index, value in pairs(current) do
+        if type(index) == "number" then
+            table.insert(result,value)
+        else
+            result[index] = value
+        end
     end
-    local curMaxFunc
-    if type(minFunc) == "function" then
-        curMaxFunc = function(a,b)
-            return minFunc(a,b) == a and b or a
+    local curComparator
+    if type(comparator) == "function" then
+        curComparator = function(a,b)
+            return not comparator(a,b)
         end
     else
-        curMaxFunc = function(a,b)
-            return a < b and b or a
+        curComparator = function(a,b)
+            return a > b
         end
     end
-    skyLinqInner.mergeSort(result,curMaxFunc)
+    skyLinqInner.mergeSort(result,curComparator)
     return result
 end
 
