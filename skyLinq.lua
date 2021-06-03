@@ -307,6 +307,22 @@ function skyLinqCommand.first(current,defaultValue,getter)
     return defaultValue
 end
 
+function skyLinqCommand.last(current,defaultValue,getter)
+    local result = defaultValue
+    local curGetter
+    if type(getter) == "function" then
+        curGetter = getter
+    else
+        curGetter = function(index,value)
+            return value
+        end
+    end
+    for index, value in ipairs(current) do
+        result = curGetter(index,value)
+    end
+    return result
+end
+
 function skyLinqCommand.count(current)
     local count = 0
     for key, value in pairs(current) do
@@ -335,21 +351,6 @@ function skyLinqCommand.countDictionary(current)
     return count - arrayCount
 end
 
-function skyLinqCommand.last(current,defaultValue,getter)
-    local result = defaultValue
-    local curGetter
-    if type(getter) == "function" then
-        curGetter = getter
-    else
-        curGetter = function(index,value)
-            return value
-        end
-    end
-    for index, value in ipairs(current) do
-        result = curGetter(index,value)
-    end
-    return result
-end
 
 ---@field last Linq
 ---@field command skyLinqCommand

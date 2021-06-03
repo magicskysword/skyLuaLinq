@@ -32,6 +32,7 @@ local arrayA
 local arrayB
 local arrayC
 local result
+local key
 
 print("Test Empty Array Linq")
 arrayA = {1,2,3,4,5,6}
