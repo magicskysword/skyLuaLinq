@@ -167,6 +167,7 @@ arrayB = skyLinq.from(arrayA)
     :thenBy(function(a,b) return  a.b<=b.b end)
     :thenBy(function(a,b) return  a.c<=b.c end)
 serialize(arrayB)
+print(arrayB)
 
 print("Test [Select] Command")
 

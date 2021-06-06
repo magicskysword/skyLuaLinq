@@ -74,8 +74,13 @@ local skyLinqCommandMateTable = {
     __index = skyLinqCommand,
 }
 
-function skyLinqCommand.create(func, ...)
+---@param name string
+---@param func function
+---@vararg any
+---@return skyLinqCommand
+function skyLinqCommand.create(name,func, ...)
     local command = {
+        name = name,
         func = func,
         params = { ... }
     }
@@ -352,9 +357,11 @@ function skyLinqCommand.countDictionary(current)
 end
 
 
----@field last Linq
+---@field lastLinq Linq
 ---@field command skyLinqCommand
 ---@field source table
+---@field isOrderBy boolean
+---@field thenByCommands table<number,skyLinqCommand>
 ---@class Linq
 local skyLinq = { }
 local skyLinqMateTable = {
@@ -365,6 +372,9 @@ local skyLinqMateTable = {
     end,
     __ipairs = function(o)
         return ipairs(o:run())
+    end,
+    __tostring = function(o)
+        return o:tostring()
     end
 }
 
@@ -378,8 +388,8 @@ local function createLinq(lastLinq)
         lastLinq = lastLinq,
         source = nil,
         command = nil,
-        isGroupBy = false,
-        isThenBy = false
+        isOrderBy = false,
+        thenByCommands = nil
     }
     setmetatable(o,skyLinqMateTable)
     return o
@@ -415,21 +425,29 @@ end
 ---@param last Linq
 ---@param command skyLinqCommand
 local function insertThenByCommand(last,command)
-    assert(last.isGroupBy,"Can't find GroupBy linq")
+    assert(last.isOrderBy,"Can't find orderBy linq")
     local newLinq = createLinq()
-    newLinq.command = command
-    newLinq.isThenBy = true
-    local findLinq = last
-    while findLinq ~= nil and findLinq.lastLinq ~= nil do
-        if findLinq.lastLinq.isThenBy then
-            findLinq = findLinq.lastLinq
-            break
-        else
-            newLinq.lastLinq = findLinq.lastLinq
-            findLinq.lastLinq = newLinq
+    local newCommandList = {}
+    newLinq.thenByCommands = newCommandList
+    newLinq.isOrderBy = true
+    newLinq.command = last.command
+    newLinq.lastLinq = last.lastLinq
+    
+    table.insert(newCommandList,command)
+    if last.thenByCommands ~= nil then
+        local count = 0
+        for i, v in ipairs(last.thenByCommands) do
+            table.insert(newCommandList,v)
+            count = count + 1
+        end
+        -- revert new list
+        for i = 1, count / 2 do
+            local tmp = newCommandList[i + 1]
+            newCommandList[i + 1] = newCommandList[count + 2 - i]
+            newCommandList[count + 2 - i] = tmp
         end
     end
-    return last
+    return newLinq
 end
 
 ---* Run all command and return result
@@ -449,6 +467,27 @@ function skyLinq:run()
     return result
 end
 
+---* Run all command and return result
+---* If you want a fixed result,you must run this function
+---@return table
+function skyLinq:tostring()
+    local result
+    if self.lastLinq ~= nil then
+        result = self.lastLinq:tostring()
+        if self.command ~= nil then
+            result = result .. table.concat({":",self.command.name,"()"})
+        end
+        if self.thenByCommands ~= nil then
+            for i, v in ipairs(self.thenByCommands) do
+                result = result .. table.concat({":",v.name,"()"})
+            end
+        end
+    else
+        result = "linq"
+    end
+    return result
+end
+
 ---* Trans a table to array table
 ---@generic TKey
 ---@generic TValue
@@ -456,7 +495,7 @@ end
 ---@param selector fun(key : TKey,value : TValue) : TNewValue such as function(key,value) return value end
 ---@return Linq
 function skyLinq:toArray(selector)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.toArray,selector))
+    return addCommand(self,skyLinqCommand.create("toArray",skyLinqCommand.toArray,selector))
 end
 
 ---* Trans a table to hash table
@@ -468,7 +507,7 @@ end
 ---@param selector fun(key : TKey,value : TValue) : TNewKey,TNewValue such as function(key,value) return key,value end
 ---@return Linq
 function skyLinq:toDictionary(selector)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.toDictionary,selector))
+    return addCommand(self,skyLinqCommand.create("toDictionary",skyLinqCommand.toDictionary,selector))
 end
 
 ---* Select the value that passed the comparator
@@ -481,7 +520,7 @@ end
 ---@param comparator any
 ---@return Linq
 function skyLinq:where(comparator)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.where,comparator))
+    return addCommand(self,skyLinqCommand.create("where",skyLinqCommand.where,comparator))
 end
 
 ---* Select the key and value that passed the comparator
@@ -495,7 +534,7 @@ end
 ---@param comparator any
 ---@return Linq
 function skyLinq:whereDictionary(comparator)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.whereDictionary,comparator))
+    return addCommand(self,skyLinqCommand.create("whereDictionary",skyLinqCommand.whereDictionary,comparator))
 end
 
 ---* Select some value from value in table
@@ -504,7 +543,7 @@ end
 ---@param getter fun(value : TValue):TNewValue such as function(value) return value.name end
 ---@return Linq
 function skyLinq:select(getter)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.select,getter))
+    return addCommand(self,skyLinqCommand.create("select",skyLinqCommand.select,getter))
 end
 
 ---* Select some value from key and value in table
@@ -514,7 +553,7 @@ end
 ---@param getter fun(key : TKey,value : TValue):TNewValue such as function(key,value) return {id = key,name = value} end
 ---@return Linq
 function skyLinq:selectDictionary(getter)
-    return addCommand(self,skyLinqCommand.create(skyLinqCommand.selectDictionary,getter))
+    return addCommand(self,skyLinqCommand.create("selectDictionary",skyLinqCommand.selectDictionary,getter))
 end
 
 ---* Sort value in array
@@ -524,8 +563,8 @@ end
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a <= b end
 ---@return Linq
 function skyLinq:orderBy(comparator)
-    local current = addCommand(self,skyLinqCommand.create(skyLinqCommand.orderBy,comparator))
-    current.isGroupBy = true
+    local current = addCommand(self,skyLinqCommand.create("orderBy",skyLinqCommand.orderBy,comparator))
+    current.isOrderBy = true
     return current
 end
 
@@ -536,8 +575,8 @@ end
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a <= b end
 ---@return Linq
 function skyLinq:orderByDescending(comparator)
-    local current = addCommand(self,skyLinqCommand.create(skyLinqCommand.orderByDescending,comparator))
-    current.isGroupBy = true
+    local current = addCommand(self,skyLinqCommand.create("orderByDescending",skyLinqCommand.orderByDescending,comparator))
+    current.isOrderBy = true
     return current
 end
 
@@ -548,7 +587,7 @@ end
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a <= b end
 ---@return Linq
 function skyLinq:thenBy(comparator)
-    return insertThenByCommand(self,skyLinqCommand.create(skyLinqCommand.orderBy,comparator))
+    return insertThenByCommand(self,skyLinqCommand.create("thenBy",skyLinqCommand.orderBy,comparator))
 end
 
 ---* Sort value in array descending before groupBy
@@ -558,7 +597,7 @@ end
 ---@param comparator fun(a : TValue,b : TValue):boolean such as function(a,b) return a <= b end
 ---@return Linq
 function skyLinq:thenByDescending(comparator)
-    return insertThenByCommand(self,skyLinqCommand.create(skyLinqCommand.orderByDescending,comparator))
+    return insertThenByCommand(self,skyLinqCommand.create("thenByDescending",skyLinqCommand.orderByDescending,comparator))
 end
 
 ---* Get the max value in table
